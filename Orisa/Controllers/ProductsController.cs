@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using Orisa.DAL;
 using Orisa.Models;
+using Orisa.ViewModel;
 
 namespace Orisa.Controllers
 {
@@ -16,10 +17,42 @@ namespace Orisa.Controllers
         private StoreContext db = new StoreContext();
 
         // GET: Products
-        public ActionResult Index()
+        public ActionResult Index(string category, string search)
         {
+            ProductIndexViewModel viewModel = new ProductIndexViewModel();
+
             var products = db.Products.Include(p => p.Category);
-            return View(products.ToList());
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                products = products.Where(p => p.Name.Contains(search) ||
+                                                  p.Category.Name.Contains(search) ||
+                                                  p.Description.Contains(search));
+                viewModel.Search = search;
+            }
+
+            viewModel.CatsWithCount = from matchingProducts in products
+                                      where
+                                      matchingProducts.CategoryID != null
+                                      group matchingProducts by
+                                      matchingProducts.Category.Name into
+                                      catGroup
+                                      select new CategoryWithCount()
+                                      {
+                                          CategoryName = catGroup.Key,
+                                          ProductCount = catGroup.Count()
+                                      };
+
+            // var categories = products.OrderBy(p => p.Category.Name).Select(p => p.Category.Name).Distinct();
+
+            if (!string.IsNullOrEmpty(category))
+            {
+                products = products.Where(p => p.Category.Name == category);
+            }
+
+            viewModel.Products = products;
+
+            return View(viewModel);
         }
 
         // GET: Products/Details/5
