@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using Orisa.DAL;
 using Orisa.Models;
 using Orisa.ViewModel;
+using PagedList;
 
 namespace Orisa.Controllers
 {
@@ -17,7 +18,7 @@ namespace Orisa.Controllers
         private StoreContext db = new StoreContext();
 
         // GET: Products
-        public ActionResult Index(string category, string search, string sortBy)
+        public ActionResult Index(string category, string search, string sortBy, int? page)
         {
             ProductIndexViewModel viewModel = new ProductIndexViewModel();
 
@@ -48,6 +49,7 @@ namespace Orisa.Controllers
             if (!string.IsNullOrEmpty(category))
             {
                 products = products.Where(p => p.Category.Name == category);
+                viewModel.Category = category;
             }
 
             //sort the results
@@ -60,10 +62,14 @@ namespace Orisa.Controllers
                     products = products.OrderByDescending(p => p.Price);
                     break;
                 default:
+                    products = products.OrderBy(p => p.Name);
                     break;
             }
 
-            viewModel.Products = products;
+            const int PageItems = 3;
+            int currentPage = (page ?? 1);
+            viewModel.Products = products.ToPagedList(currentPage, PageItems);
+            viewModel.SortBy = sortBy;
 
             viewModel.Sorts = new Dictionary<string, string>
             {
