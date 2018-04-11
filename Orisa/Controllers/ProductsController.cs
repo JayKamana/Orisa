@@ -66,9 +66,8 @@ namespace Orisa.Controllers
                     break;
             }
 
-            const int PageItems = 3;
             int currentPage = (page ?? 1);
-            viewModel.Products = products.ToPagedList(currentPage, PageItems);
+            viewModel.Products = products.ToPagedList(currentPage, Constants.PageItems);
             viewModel.SortBy = sortBy;
 
             viewModel.Sorts = new Dictionary<string, string>
@@ -96,7 +95,7 @@ namespace Orisa.Controllers
         }
 
         // GET: Products/Create
-        public ActionResult Create()
+        public ActionResult Upload()
         {
             ViewBag.CategoryID = new SelectList(db.Categories, "ID", "Name");
             return View();
@@ -107,7 +106,7 @@ namespace Orisa.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Name,Description,Price,CategoryID")] Product product)
+        public ActionResult Upload([Bind(Include = "ID,Name,Description,Price,CategoryID")] Product product)
         {
             if (ModelState.IsValid)
             {
