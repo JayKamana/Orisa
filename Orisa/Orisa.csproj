@@ -222,6 +222,10 @@
     <Compile Include="Migrations\201803251920106_AddProductImages.Designer.cs">
       <DependentUpon>201803251920106_AddProductImages.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201804221359465_UniqueFileName.cs" />
+    <Compile Include="Migrations\201804221359465_UniqueFileName.Designer.cs">
+      <DependentUpon>201804221359465_UniqueFileName.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Category.cs" />
@@ -301,7 +305,7 @@
     <Content Include="Views\Products\Details.cshtml" />
     <Content Include="Views\Products\Edit.cshtml" />
     <Content Include="Views\Products\Index.cshtml" />
-    <Content Include="Views\ProductImages\Create.cshtml" />
+    <Content Include="Views\ProductImages\Upload.cshtml" />
     <Content Include="Views\ProductImages\Delete.cshtml" />
     <Content Include="Views\ProductImages\Details.cshtml" />
     <Content Include="Views\ProductImages\Edit.cshtml" />
@@ -336,6 +340,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201803251920106_AddProductImages.resx">
       <DependentUpon>201803251920106_AddProductImages.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201804221359465_UniqueFileName.resx">
+      <DependentUpon>201804221359465_UniqueFileName.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

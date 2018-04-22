@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -38,7 +40,7 @@ namespace Orisa.Controllers
         }
 
         // GET: ProductImages/Create
-        public ActionResult Create()
+        public ActionResult Upload()
         {
             return View();
         }
@@ -155,27 +157,51 @@ namespace Orisa.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Upload(HttpPostedFileBase file)
+        public ActionResult Upload(HttpPostedFileBase[] files)
         {
-            //check the user has entered a file
-            if (file != null)
-            {
-                //check if the file is valid
-                if (ValidateFile(file))
-                {
-                    try
-                    {
-                        SaveFileToDisk(file);
-                    }
-                    catch (Exception)
-                    {
+            bool allValid = true;
+            string inValidFiles = "";
 
-                        ModelState.AddModelError("FileName", "Sorry an error occurred saving the file to disk, please try again");
+            //check the user has entered a file
+            if (files[0] != null)
+            {
+                //if the user has entered less than ten files
+                if (files.Length <= 10)
+                {
+                    //check they are all valid
+                    foreach (var file in files)
+                    {
+                        if (!ValidateFile(file))
+                        {
+                            allValid = false;
+                            inValidFiles += ", " + file.FileName;
+                        }
+                    }
+                    //if they are all valid then try to save them to disk
+                    if (allValid)
+                    {
+                        foreach (var file in files)
+                        {
+                            try
+                            {
+                                SaveFileToDisk(file);
+                            }
+                            catch (Exception)
+                            {
+                                ModelState.AddModelError("FileName", "Sorry an error occurred saving the files to disk, please try again");
+                            }
+                        }
+                    }
+                    //else add an error listing out the invalid files
+                    else
+                    {
+                        ModelState.AddModelError("FileName", "All files must be gif, png, jpeg or jpg and less than 2MB in size.The following files" + inValidFiles + " are not valid");
                     }
                 }
+                //the user has entered more than 10 files
                 else
                 {
-                    ModelState.AddModelError("FileName", "The file must be gif, png, jpeg or jpg and less than 2MB in size");
+                    ModelState.AddModelError("FileName", "Please only upload up to ten files at a time");
                 }
             }
             else
@@ -185,10 +211,48 @@ namespace Orisa.Controllers
             }
             if (ModelState.IsValid)
             {
-                db.ProductImages.Add(new ProductImage { FileName = file.FileName });
-                db.SaveChanges();
+                bool duplicates = false;
+                bool otherDbError = false;
+                string duplicateFiles = "";
+
+                foreach (var file in files)
+                {
+                    //try and save each file
+                    var productToAdd = new ProductImage { FileName = file.FileName };
+                    try
+                    {
+                        db.ProductImages.Add(productToAdd);
+                        db.SaveChanges();
+                    }
+                    //if there is an exception check if it is caused by a duplicate file
+                    catch (DbUpdateException ex)
+                    {
+                        SqlException innerException = ex.InnerException.InnerException as SqlException;
+                        if (innerException != null && innerException.Number == 2601)
+                        {
+                            duplicateFiles += ", " + file.FileName;
+                            duplicates = true;
+                        }
+                        else
+                        {
+                            otherDbError = true;
+                        }
+                    }
+                }
+                //add a list of duplicate files to the error message
+                if (duplicates)
+                {
+                    ModelState.AddModelError("FileName", "All files uploaded except the files" + duplicateFiles + ", which already exist in the system." + " Please delete them and try again if you wish to re - add them");
+                    return View();
+                }
+                else if (otherDbError)
+                {
+                    ModelState.AddModelError("FileName", "Sorry an error has occurred saving to the database, please try again");
+                    return View();
+                }
                 return RedirectToAction("Index");
             }
+
             return View();
         }
     }
