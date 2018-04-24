@@ -1,13 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
 
-namespace Orisa.Models
+namespace Orisa.ViewModel
 {
-    public class Product
+    public class ProductViewModel
     {
         public int ID { get; set; }
 
-        [Display(Name = "Product Name")]
+        [Required(ErrorMessage = "The product name cannot be blank")]
+        [StringLength(50, MinimumLength = 3, ErrorMessage = "Please enter a product name between 3 and 50 characters in length")]
+        [RegularExpression(@"^[a-zA-Z0-9'-'\s]*$", ErrorMessage = "Please enter a product name made up of letters and numbers only")]
         public string Name { get; set; }
 
         [Required(ErrorMessage = "The product description cannot be blank")]
@@ -23,10 +29,13 @@ namespace Orisa.Models
         [RegularExpression("[0-9]+(\\.[0-9][0-9]?)?", ErrorMessage = "The price must be a number up to two decimal places")]
         public decimal Price { get; set; }
 
-        public int? CategoryID { get; set; }
-        public virtual Category Category {get; set;}
+        [Display(Name = "Category")]
+        public int CategoryID { get; set; }
 
-        public virtual ICollection<ProductImageMapping> ProductImageMappings { get; set; }
+        public SelectList CategoryList { get; set; }
 
+        public List<SelectList> ImageLists { get; set; }
+
+        public string[] ProductImages { get; set; }
     }
 }
