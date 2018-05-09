@@ -404,6 +404,7 @@
     <Content Include="Views\ProductImages\Delete.cshtml" />
     <Content Include="Views\ProductImages\Index.cshtml" />
     <Content Include="Views\Error\FileUploadLimitExceeded.cshtml" />
+    <Content Include="Views\Shared\ViewProductEditCreatePartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
