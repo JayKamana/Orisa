@@ -63,6 +63,8 @@ namespace Orisa
             //    ClientId = "",
             //    ClientSecret = ""
             //});
+
+            app.CreatePerOwinContext<ApplicationRoleManager>(ApplicationRoleManager.Create);
         }
     }
 }
